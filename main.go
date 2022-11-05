@@ -11,7 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type test struct {
+type details struct {
 	name      string `json:"name,omitempty"`
 	job       string `json:"job,omitempty"`
 	id        string `json:"id,omitempty"`
@@ -20,16 +20,27 @@ type test struct {
 
 func testPage(c *gin.Context) {
 
-	name := c.Param("name")
-	job := c.Param("job")
+	var detail1 details
 
-	test1 := test{name: name, job: job}
+	err := c.ShouldBind(&detail1)
+	if err != nil {
+		log.Fatalf("An Error Occured %v", err)
+	}
+	fmt.Println(detail1)
 
-	testJSON, err := json.Marshal(test1)
+	res := externalApi(detail1)
 
-	rb := bytes.NewBuffer(testJSON)
+	fmt.Println(res)
 
-	resp, err := http.Post("https://reqres.in/api/users", "application/json", rb)
+}
+
+func externalApi(res details) details {
+
+	detailJSON, err := json.Marshal(res)
+
+	reqBody := bytes.NewReader(detailJSON)
+
+	resp, err := http.Post("https://reqres.in/api/users", "application/json", reqBody)
 
 	if err != nil {
 		log.Fatalf("An Error Occured %v", err)
@@ -38,16 +49,14 @@ func testPage(c *gin.Context) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("An Error Occured %v", err)
 	}
 
-	var result test
+	var result details
 	err = json.Unmarshal([]byte(body), &result)
 	fmt.Println(err)
 
-	sb := string(body)
-	c.JSON(http.StatusOK, sb)
-
+	return (result)
 }
 
 func main() {
