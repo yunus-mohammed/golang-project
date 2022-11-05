@@ -30,6 +30,8 @@ func testPage(c *gin.Context) {
 
 	res := externalApi(detail1)
 
+	c.JSON(http.StatusOK, res)
+
 	fmt.Println(res)
 
 }
@@ -62,5 +64,5 @@ func externalApi(res details) details {
 func main() {
 	router := gin.Default()
 	router.POST("/test", testPage)
-	router.Run("localhost:8085")
+	router.Run("localhost:8087")
 }
