@@ -1,5 +1,8 @@
 package main
 
+/*
+package main
+
 import (
 	"bytes"
 	"context"
@@ -12,6 +15,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 )
+
+var num int = 0
 
 type details struct {
 	Name      string `json:"name,omitempty"`
@@ -30,15 +35,12 @@ func detailsPage(c *gin.Context) {
 		log.Fatalf("An Error Occured %v", err)
 	}
 
+	detail2 = externalApi(detail1)
+
 	val := redisClientGet(detail2)
 
-	if val != "" {
-		val2 := redisClientGet(detail2)
-		c.JSON(http.StatusOK, val2)
-	}
+	c.JSON(http.StatusOK, val)
 
-	detail2 = externalApi(detail1)
-	c.JSON(http.StatusOK, detail2)
 }
 
 func externalApi(detail1 details) details {
@@ -113,3 +115,5 @@ func main() {
 	router.POST("/test", detailsPage)
 	router.Run("localhost:8087")
 }
+
+*/
