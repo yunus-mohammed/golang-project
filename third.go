@@ -22,28 +22,33 @@ type details struct {
 
 var redisClient *redis.Client
 
-func detailsPage(c *gin.Context) {
+func respHandler(c *gin.Context) {
 
-	var detail1 details
-	var detail2 details
-	var detailResp details
+	var req details
+	var res details
+	var strDetails details
 
-	err := c.ShouldBind(&detail1)
+	err := c.ShouldBind(&req)
 	if err != nil {
 		log.Fatalf("An Error Occured %v", err)
 	}
 
-	val := redisClientGet(detail2)
+	str := RedisClientGetVal(string(req.Name))
 
-	if val != "" || len(val) == 0 {
-		val = redisClientGet(detail2)
-		c.JSON(http.StatusOK, val)
-	} else {
-		detailResp = externalApi(detail1)
-		c.JSON(http.StatusOK, detailResp)
+	err1 := json.Unmarshal([]byte(str), &strDetails)
+	if err1 != nil {
+		log.Fatalf("An Error Occured %v", err1)
 	}
 
-	//c.JSON(http.StatusOK, detailResp)
+	if str != "" || len(str) != 0 {
+
+		c.JSON(http.StatusOK, strDetails)
+		return
+	}
+
+	res = externalApi(req)
+	c.JSON(http.StatusOK, res)
+	return
 }
 
 func externalApi(detail1 details) details {
@@ -67,7 +72,7 @@ func externalApi(detail1 details) details {
 	var result details
 	err = json.Unmarshal([]byte(body), &result)
 
-	redisClientSet(result)
+	RedisClientSetVal(string(result.Name), string(body))
 
 	return result
 
@@ -81,13 +86,13 @@ func clientInit() {
 		DB:       0,
 	})
 
-	//val, err := redisClient.Ping().Result()
 }
 
 func getRedisClient() *redis.Client {
 	return redisClient
 }
 
+/*
 func redisClientSet(result details) {
 
 	var ctx = context.Background()
@@ -105,7 +110,28 @@ func redisClientSet(result details) {
 	}
 
 }
+*/
+func RedisClientSetVal(key string, str string) {
 
+	var strDetails details
+
+	var ctx = context.Background()
+
+	client := getRedisClient()
+
+	err := json.Unmarshal([]byte(str), &strDetails)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	err = client.Set(ctx, key, strDetails, 0).Err()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
+/*
 func redisClientGet(result details) string {
 
 	var ctx = context.Background()
@@ -118,11 +144,26 @@ func redisClientGet(result details) string {
 	}
 	return val
 
+}*/
+
+func RedisClientGetVal(key string) string {
+
+	var ctx = context.Background()
+
+	client := getRedisClient()
+
+	val, err := client.Get(ctx, key).Result()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return val
+
 }
 
 func main() {
 	router := gin.Default()
 	clientInit()
-	router.POST("/test", detailsPage)
+	router.POST("/test", respHandler)
 	router.Run("localhost:8087")
 }
