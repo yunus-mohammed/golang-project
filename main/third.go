@@ -10,7 +10,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
+
+	"github.com/yunus-mohammed/golang-project/redisclient"
 )
 
 type details struct {
@@ -19,8 +20,6 @@ type details struct {
 	Id        string `json:"id,omitempty"`
 	CreatedAt string `json:"createdAt,omitempty"`
 }
-
-var redisClient *redis.Client
 
 func respHandler(c *gin.Context) {
 
@@ -78,20 +77,6 @@ func externalApi(detail1 details) details {
 
 }
 
-func clientInit() {
-
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-
-}
-
-func getRedisClient() *redis.Client {
-	return redisClient
-}
-
 /*
 func redisClientSet(result details) {
 
@@ -117,7 +102,7 @@ func RedisClientSetVal(key string, str string) {
 
 	var ctx = context.Background()
 
-	client := getRedisClient()
+	client := redisclient.GetRedisClient()
 
 	err := json.Unmarshal([]byte(str), &strDetails)
 	if err != nil {
@@ -150,7 +135,7 @@ func RedisClientGetVal(key string) string {
 
 	var ctx = context.Background()
 
-	client := getRedisClient()
+	client := redisclient.GetRedisClient()
 
 	val, err := client.Get(ctx, key).Result()
 	if err != nil {
@@ -163,7 +148,7 @@ func RedisClientGetVal(key string) string {
 
 func main() {
 	router := gin.Default()
-	clientInit()
+	redisclient.ClientInit()
 	router.POST("/test", respHandler)
 	router.Run("localhost:8087")
 }
