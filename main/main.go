@@ -1,5 +1,5 @@
 package main
-
+/*
 import (
 	"bytes"
 	"context"
@@ -33,17 +33,20 @@ func detailsPage(c *gin.Context) {
 		log.Fatalf("An Error Occured %v", err)
 	}
 
+
+
+
+
+
 	val := redisClientGet(detail2)
 
 	if val != "" || len(val) == 0 {
-		val = redisClientGet(detail2)
-		c.JSON(http.StatusOK, val)
+		val2 := redisClientGet(detail2)
 	} else {
 		detailResp = externalApi(detail1)
-		c.JSON(http.StatusOK, detailResp)
 	}
 
-	//c.JSON(http.StatusOK, detailResp)
+	c.JSON(http.StatusOK, detailResp)
 }
 
 func externalApi(detail1 details) details {
@@ -73,20 +76,6 @@ func externalApi(detail1 details) details {
 
 }
 
-func clientInit() {
-
-	redisClient = redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-
-	//val, err := redisClient.Ping().Result()
-}
-
-func getRedisClient() *redis.Client {
-	return redisClient
-}
 
 func redisClientSet(result details) {
 
@@ -126,3 +115,4 @@ func main() {
 	router.POST("/test", detailsPage)
 	router.Run("localhost:8087")
 }
+*/

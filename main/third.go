@@ -1,6 +1,10 @@
 package main
 
 import (
+	"database/sql"
+
+	_ "github.com/go-sql-driver/mysql"
+
 	"bytes"
 	"context"
 	"encoding/json"
@@ -10,7 +14,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-
 	"github.com/yunus-mohammed/golang-project/redisclient"
 )
 
@@ -20,6 +23,8 @@ type details struct {
 	Id        string `json:"id,omitempty"`
 	CreatedAt string `json:"createdAt,omitempty"`
 }
+
+var response details
 
 func respHandler(c *gin.Context) {
 
@@ -42,11 +47,13 @@ func respHandler(c *gin.Context) {
 	if str != "" || len(str) != 0 {
 
 		c.JSON(http.StatusOK, strDetails)
+		response = strDetails
 		return
 	}
 
 	res = externalApi(req)
 	c.JSON(http.StatusOK, res)
+	response = strDetails
 	return
 }
 
@@ -96,6 +103,7 @@ func redisClientSet(result details) {
 
 }
 */
+
 func RedisClientSetVal(key string, str string) {
 
 	var strDetails details
@@ -146,9 +154,32 @@ func RedisClientGetVal(key string) string {
 
 }
 
+/*
+func SQLClientSetVal() {
+
+	db := sqlclient.GetSQLClient()
+
+	db.SetConnMaxLifetime(time.Minute * 3)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
+
+}*/
+
 func main() {
 	router := gin.Default()
 	redisclient.ClientInit()
 	router.POST("/test", respHandler)
+	db, err := sql.Open("mysql", "root:welcome123@tcp(127.0.0.1:3306)/testDB")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+	//insert, err := db.Query("INSERT INTO test_table VALUES('morpheus','leader','1480','09841')")
+	insert, err := db.Query("INSERT INTO test_table ($1, $2, $3, $4) VALUES (name, job, id, createdat)", response.Name, response.Job, response.Id, response.CreatedAt)
+	if err != nil {
+		panic(err.Error())
+	}
+	defer insert.Close()
+	fmt.Println("Values added!")
 	router.Run("localhost:8087")
 }
