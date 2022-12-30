@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
       unripe_fruits[i] += num_unripe;
     }
 
-    if (rank != 0 && j % 4 == 0) {
+    if (rank != 0) {
       MPI_Send(&ripe_fruits[i], 1, MPI_INT, 0, i, MPI_COMM_WORLD);
       MPI_Send(&unripe_fruits[i], 1, MPI_INT, 0, i, MPI_COMM_WORLD);
     }
